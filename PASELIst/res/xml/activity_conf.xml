@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="アカウント">
+		<EditTextPreference
+			android:key="user"
+			android:title="KONAMI ID"
+			android:dialogTitle="KONAMI IDを入力"
+			android:summary="必須"
+			android:inputType="text" />
+		<EditTextPreference
+			android:key="pass"
+			android:title="パスワード"
+			android:summary="入力非推奨 (空にすると毎回確認します)"
+			android:dialogTitle="パスワードを入力"
+			android:inputType="textPassword" />
+		<CheckBoxPreference
+		    android:key="useotp"
+		    android:title="ワンタイムパスワードを使用する"
+		    android:summary="おすすめ (OTPトークンが必要です)"/>
+	</PreferenceCategory>
+
+	<PreferenceCategory android:title="Info">
+		<Preference android:enabled="false"
+		    android:title="Tips"
+		    android:summary="リストの項目をタップすると詳細表示します"/>
+		<Preference android:enabled="false"
+		    android:title="Version"
+		    android:summary="0.5" />
+	</PreferenceCategory>
+</PreferenceScreen>
