@@ -26,6 +26,6 @@
 		    android:summary="リストの項目をタップすると詳細表示します"/>
 		<Preference android:enabled="false"
 		    android:title="Version"
-		    android:summary="0.5" />
+		    android:summary="0.6 : My KONAMIの仕様変更に対応" />
 	</PreferenceCategory>
 </PreferenceScreen>

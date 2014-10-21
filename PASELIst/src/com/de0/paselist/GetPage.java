@@ -32,7 +32,7 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 	private static final String loadStr = "読込中...";
 
 	//myKONAMIとpaseliのページタイトル
-	private static final String titleMykonami = "my KONAMI";
+	private static final String titleMykonami = "My KONAMI";
 	private static final String titlePaseli = "PASELI";
 
 	private WebView web;
@@ -71,7 +71,7 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 		progress = new ProgressDialog(context);
 		progress.setTitle("ログイン処理中");
 		progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		progress.setMax(5);
+		progress.setMax(6);
 		progress.setProgress(0);
 		progress.setCancelable(false);
 		progress.show();
@@ -99,29 +99,46 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 
 		//MyKONAMI
 		publishProgress(1);
-		pageTransition("https://my.konami.net/login.do", titleMykonami);
+//		pageTransition("https://my.konami.net/login.do", titleMykonami);
+		pageTransition("https://my.konami.net", titleMykonami);
 		if (isCancelled()){
-//			message += "https://my.konami.net/login.do への接続に失敗\n";
+			message += "https://my.konami.net への接続に失敗\n";
+			return "loginfail";
+		}
+
+		//ログイン画面へ
+		publishProgress(2);
+		pageTransition("javascript:mojarra.jsfcljs(document.getElementById('j_idt8'),{'j_idt8:j_idt16':'j_idt8:j_idt16'},'');", titleMykonami);
+		if (isCancelled()){
+			message += "my.konami.net ログインフォームへの接続に失敗\n";
 			return "loginfail";
 		}
 
 
-		//ログイン
-		publishProgress(2);
-		web.loadUrl("javascript:(function(){document.mainForm.strPassword.value='" + pass + "';})();");
-		web.loadUrl("javascript:(function(){document.mainForm.strKonamiid.value='" + user + "';})();");
-		if (sp.getBoolean("useotp",false))
+		//ログイン実施
+		publishProgress(3);
+//		web.loadUrl("javascript:(function(){document.mainForm.strPassword.value='" + pass + "';})();");
+//		web.loadUrl("javascript:(function(){document.mainForm.strKonamiid.value='" + user + "';})();");
+		web.loadUrl("javascript:(function(){document.loginForm.elements['loginForm:login_input1'].value='" + user + "';})();");
+		web.loadUrl("javascript:(function(){document.loginForm.elements['loginForm:login_input2'].value='" + pass + "';})();");
+		if (sp.getBoolean("useotp",false)){
 			web.loadUrl("javascript:(function(){document.mainForm.strOtpPassword.value='" + otp + "';})();");
+		}
 
-		pageTransition("javascript:document.mainForm.submit();", titleMykonami);
+//		pageTransition("javascript:document.mainForm.submit();", titleMykonami);
+		pageTransition("javascript:mojarra.jsfcljs(document.getElementById('loginForm'),{'loginForm:j_idt178':'loginForm:j_idt178'},'');", titleMykonami);
 		if (isCancelled()){
-//			message += "my.konami.net 接続失敗\n";
+			message += "my.konami.net ログイン失敗\n";
 			return "loginfail";
 		}
 
 		//PASELI
-		publishProgress(3);
-		pageTransition("javascript:goRedirect('/paseli/login.kc');", titlePaseli);
+		publishProgress(4);
+		pageTransition("javascript:Android.getSource(document.documentElement.outerHTML);", titleMykonami);
+		String gsession_id = getDoc().select("[name=gsession_id]").attr("value");
+
+//		pageTransition("javascript:goRedirect('/paseli/login.kc');", titlePaseli);
+		pageTransition("javascript:location.href='/paseli/login.kc?gsession_id="+gsession_id+"&amp;sub=glogin';", titlePaseli);
 		if (isCancelled()){
 			message += "\nPASELIチャージサイト接続失敗\n"
 					+"・ID/パスが正しいか確認して下さい\n";
@@ -129,15 +146,17 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 		}
 
 		//購入履歴
-		publishProgress(4);
+		publishProgress(5);
+		pageTransition("javascript:location.href='payinfo.kc';", titlePaseli);
 		pageTransition("javascript:location.href='payinfo.kc';", titlePaseli);
 		if (isCancelled()){
-//			message += "PASELI履歴ページ 接続失敗\n";
+			message += "PASELI履歴ページ 接続失敗\n";
 			return "loginfail";
 		}
 
+
 		//1ページ目
-		publishProgress(5);
+		publishProgress(6);
 		pageTransition("javascript:Android.getSource(document.documentElement.outerHTML);", titlePaseli);
 		Document doc = getDoc();
 
@@ -235,12 +254,12 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 		spinner.setSelection(spselected);
 
 
-		message += "\nその他主な要因\n"
+/*		message += "\nその他主な要因\n"
 					+"・ネットワークが利用できない\n"
 					+"・途中で回線が切替った(3G/Wifi)\n"
 					+"・サーバが落ちてる\n"
 					+"・端末のRAM不足";
-
+*/
 		//ダイアログ出す
 		AlertDialog.Builder alert = new AlertDialog.Builder(context);
 		alert.setTitle("ページ取得失敗 \n(" + web.getTitle()+ ")");
