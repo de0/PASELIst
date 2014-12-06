@@ -7,38 +7,29 @@ import java.util.Map;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 
 public class MainActivity extends Activity{
 
 	private final String TAG = "MainActivity";
+
+	private static final int REQUEST_REVERSE_ACTIVITY = 1;
 
 	private SharedPreferences sp;
 	private List<Map<String,String>> listData;
@@ -64,8 +55,8 @@ public class MainActivity extends Activity{
 
 	private OnClickListener updateButtonListener;
 
-	private String pass;
-	private String otp;
+//	private String pass;
+//	private String otp;
 	private String shareStr;
 
 	private Boolean backable;
@@ -86,7 +77,6 @@ public class MainActivity extends Activity{
 
 		//リスナ定義
 		setListener();
-
 
 		//ボタン定義
 		btn_get = (Button)findViewById(R.id.button_get);
@@ -119,7 +109,6 @@ public class MainActivity extends Activity{
 
 		//スピナー
 		spinner = (Spinner)findViewById(R.id.spinner1);
-//		ArrayAdapter<String> spadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
 		spadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
 		spadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spadapter.add("利用履歴");	//0
@@ -139,31 +128,17 @@ public class MainActivity extends Activity{
 			}
 		});
 
-		/*
-		///////// テスト用 /////////////
-		Button btn_tst = (Button)findViewById(R.id.tst);
-		btn_tst.setVisibility(View.GONE);
-		btn_tst.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				db.open();
-				db.deleteNewest();
-				db.close();
-			}
-		});
-		/////////////////////////
-		 */
-
-
 		chart_area = (LinearLayout)findViewById(R.id.chart);
 
+
         setDefault();
-		ifUserNotConfig();
+//		ifUserNotConfig();
 
 		Log.v(TAG,"oncleate complated");
 	}//onCreateここまで-------------------------
 
 
+	/*
 	//メニュー作成
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -180,6 +155,7 @@ public class MainActivity extends Activity{
 		}
 		return false;
 	}
+	*/
 
 	//戻るキー
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -268,6 +244,7 @@ public class MainActivity extends Activity{
 
 	}
 
+	/*
 	//ユーザ名未設定なら設定に移る
 	private boolean ifUserNotConfig(){
 		String user = sp.getString("user","");
@@ -280,7 +257,7 @@ public class MainActivity extends Activity{
 		}
 		return false;
 	}
-
+	*/
 
 	//リスナ定義
 	private void setListener(){
@@ -402,91 +379,35 @@ public class MainActivity extends Activity{
 		updateButtonListener = new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				pass = sp.getString("pass","");
-				pass = Encryptor.getDecryptStr(pass,genKey());
-				otp  = "";
-
-				//ユーザなかったら設定へ
-				if (ifUserNotConfig())
-					return;
-
-				//パスなしならダイアログ出す
-				if ( pass.equals("") ){
-					makePassDialog();
-					return;
-				}else if ( sp.getBoolean("useotp",false) ){   //OTP使う場合
-					makeOtpDialog();
-					return;
-				}
-
-				//通常処理
-				GetPage task = new GetPage(MainActivity.this, (WebView)findViewById(R.id.webView1) , spinner,spadapter, pass, otp);
-				task.execute();
+				Intent intent = new Intent(MainActivity.this,WebActivity.class);
+				startActivityForResult(intent, REQUEST_REVERSE_ACTIVITY);
 			}
 		};
-
 	}
 
-	private void makePassDialog(){
-		final EditText edit = new EditText(MainActivity.this);
-		edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-		AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-		alert.setTitle("パスワード");
-		alert.setView(edit);
-		alert.setPositiveButton("OK",new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				pass = edit.getText().toString();
+        if (requestCode == REQUEST_REVERSE_ACTIVITY){
+        	setDefault();
+        }
+/*        switch (requestCode) {
+	        case REQUEST_REVERSE_ACTIVITY:
+		        switch (resultCode) {
+			        case RESULT_OK:
+			        	setDefault();
+			        	break;
+			        default:
+			        	break;
+		        }
+		        break;
 
-				if ( sp.getBoolean("useotp",false) ){
-					makeOtpDialog();
-				} else {
-					GetPage task = new GetPage(MainActivity.this, (WebView)findViewById(R.id.webView1) , spinner,spadapter, pass, otp);
-					task.execute();
-				}
-			}
-		});
-		alert.show();
-	}
+	        default:
+	        	break;
+        }
+        */
+    }
 
-
-	private void makeOtpDialog(){
-		final EditText edit = new EditText(MainActivity.this);
-		edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-
-		AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-		alert.setTitle("ワンタイムパスワード");
-		alert.setView(edit);
-		alert.setPositiveButton("OK",new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				otp = edit.getText().toString();
-				GetPage task = new GetPage(MainActivity.this, (WebView)findViewById(R.id.webView1) , spinner,spadapter, pass, otp);
-				task.execute();
-			}
-		});
-		alert.show();
-	}
-
-
-
-	//キー用文字列生成
-	private String genKey(){
-		PackageInfo pkg = null;
-		try {
-			pkg = getPackageManager().getPackageInfo(this.getApplicationInfo().packageName, PackageManager.GET_META_DATA);
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		Long installTime = pkg.firstInstallTime;
-		String pkgName = pkg.packageName;
-
-		String key = pkgName + String.valueOf(installTime);
-
-		return key;
-	}
 
 
 	//統計を反映

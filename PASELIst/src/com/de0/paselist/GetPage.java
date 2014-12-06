@@ -40,9 +40,9 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 	private SharedPreferences sp;
 	private Db db;
 
-	private Spinner spinner;
-	private ArrayAdapter<String> spadapter;
-	private Integer spselected;
+//	private Spinner spinner;
+//	private ArrayAdapter<String> spadapter;
+//	private Integer spselected;
 
 	private ProgressDialog progress = null;
 
@@ -52,15 +52,16 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 	private String pass;
 	private String otp;
 
-	public GetPage(Context context, WebView webView, Spinner spi,ArrayAdapter<String> spa, String passwd, String otpstr){
+//	public GetPage(Context context, WebView webView, Spinner spi,ArrayAdapter<String> spa, String passwd, String otpstr){
+	public GetPage(Context context, WebView webView, String passwd, String otpstr){
 		this.web = webView;
 		this.context = context;
 		this.sp = PreferenceManager.getDefaultSharedPreferences(context);
 
 		this.db = new Db(context);
 
-		this.spinner = spi;
-		this.spadapter = spa;
+//		this.spinner = spi;
+//		this.spadapter = spa;
 
 		this.pass = passwd;
 		this.otp = otpstr;
@@ -71,24 +72,24 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 		progress = new ProgressDialog(context);
 		progress.setTitle("ログイン処理中");
 		progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		progress.setMax(6);
+		progress.setMax(1);
 		progress.setProgress(0);
 		progress.setCancelable(false);
 		progress.show();
 
 //		new WebView;
-		web.setWebViewClient(new WebViewClient());
-		web.getSettings().setJavaScriptEnabled(true);
-		web.getSettings().setLoadsImagesAutomatically(false);
+//		web.setWebViewClient(new WebViewClient());
+//		web.getSettings().setJavaScriptEnabled(true);
+//		web.getSettings().setLoadsImagesAutomatically(false);
 		web.addJavascriptInterface(new JsInterface(context),"Android");
-		web.getSettings().setSavePassword(false);
-		web.getSettings().setSaveFormData(false);
+//		web.getSettings().setSavePassword(false);
+//		web.getSettings().setSaveFormData(false);
 
 		user = sp.getString("user","");
 
-		spselected = spinner.getSelectedItemPosition();
-		spadapter.add(loadStr);
-		spinner.setSelection(spinner.getCount()-1);
+//		spselected = spinner.getSelectedItemPosition();
+//		spadapter.add(loadStr);
+//		spinner.setSelection(spinner.getCount()-1);
 
 		message = "";
 	}
@@ -97,14 +98,15 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 	protected String doInBackground(String... arg0) {
 		db.open();
 
+/*
 		//MyKONAMI
 		publishProgress(1);
-//		pageTransition("https://my.konami.net/login.do", titleMykonami);
 		pageTransition("https://my.konami.net", titleMykonami);
 		if (isCancelled()){
 			message += "https://my.konami.net への接続に失敗\n";
 			return "loginfail";
 		}
+
 
 		//ログイン画面へ
 		publishProgress(2);
@@ -144,9 +146,10 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 					+"・ID/パスが正しいか確認して下さい\n";
 			return "loginfail";
 		}
+*/
 
 		//購入履歴
-		publishProgress(5);
+		publishProgress(1);
 		pageTransition("javascript:location.href='payinfo.kc';", titlePaseli);
 		pageTransition("javascript:location.href='payinfo.kc';", titlePaseli);
 		if (isCancelled()){
@@ -221,8 +224,8 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 			progress = null;
 		}
 
-		spadapter.remove(loadStr);
-		spinner.setSelection(spselected);
+//		spadapter.remove(loadStr);
+//		spinner.setSelection(spselected);
 
 
 		Toast.makeText(context, result, Toast.LENGTH_LONG).show();
@@ -250,16 +253,9 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 			progress = null;
 		}
 
-		spadapter.remove(loadStr);
-		spinner.setSelection(spselected);
+//		spadapter.remove(loadStr);
+//		spinner.setSelection(spselected);
 
-
-/*		message += "\nその他主な要因\n"
-					+"・ネットワークが利用できない\n"
-					+"・途中で回線が切替った(3G/Wifi)\n"
-					+"・サーバが落ちてる\n"
-					+"・端末のRAM不足";
-*/
 		//ダイアログ出す
 		AlertDialog.Builder alert = new AlertDialog.Builder(context);
 		alert.setTitle("ページ取得失敗 \n(" + web.getTitle()+ ")");
@@ -323,8 +319,6 @@ public class GetPage extends AsyncTask<String, Integer, String>{
 			if (web.getProgress() == 100) break;
 			t++;
 		}
-
-
 
 
 		//タイムアウトなら終わり

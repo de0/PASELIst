@@ -52,7 +52,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/webView1"
         android:padding="10dp"
-        android:text="アカウントを設定して更新を行なって下さい\n\n初回取得のみは時間が掛かります。\n(通信が安定した所での取得を推奨)" />
+        android:text="" />
 
     <ListView
         android:id="@+id/listViewMain"
